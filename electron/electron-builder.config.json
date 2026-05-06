@@ -1,0 +1,28 @@
+{
+  "appId": "com.college.attendance",
+  "productName": "SVSU Attendance APP",
+  "directories": {
+    "buildResources": "resources",
+    "output": "dist"
+  },
+  "files": [
+    "assets/**/*",
+    "build/**/*",
+    "capacitor.config.*",
+    "app/**/*"
+  ],
+  "nsis": {
+    "artifactName": "SVSU-Attendance-APP-Setup.exe",
+    "allowElevation": true,
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true
+  },
+  "win": {
+    "target": "nsis",
+    "icon": "assets/appIcon.ico"
+  },
+  "mac": {
+    "category": "your.app.category.type",
+    "target": "dmg"
+  }
+}

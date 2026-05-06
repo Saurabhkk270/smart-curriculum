@@ -15,7 +15,7 @@ const DashboardLayout = () => {
         
         <div className="flex-1 flex flex-col w-full min-w-0">
           {/* Header */}
-          <header className="sticky top-0 z-40 border-b bg-card shadow-sm pt-[env(safe-area-inset-top)]">
+          <header className="sticky top-0 z-40 border-b bg-white shadow-sm pt-[env(safe-area-inset-top)]">
             <div className="flex items-center justify-between px-2 sm:px-4 h-14 sm:h-16">
               <div className="flex items-center gap-2 sm:gap-3 overflow-hidden">
                 <SidebarTrigger className="lg:hidden shrink-0">
@@ -23,11 +23,11 @@ const DashboardLayout = () => {
                 </SidebarTrigger>
                 
                 <div className="flex items-center gap-2 sm:gap-4 transition-transform hover:scale-[1.01] overflow-hidden">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-lg sm:rounded-xl bg-white/10 backdrop-blur-sm border border-border/50 flex items-center justify-center shadow-lg p-1 sm:p-1.5 overflow-hidden shrink-0">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-lg sm:rounded-xl bg-white border border-border/50 flex items-center justify-center shadow-lg p-1 sm:p-1.5 overflow-hidden shrink-0">
                     <img src="/logo.png" alt="Logo" className="w-full h-full object-contain filter drop-shadow-md" />
                   </div>
                   <h1 className="text-lg sm:text-2xl md:text-3xl font-extrabold bg-gradient-to-r from-primary via-indigo-500 to-accent bg-clip-text font-sans text-transparent tracking-tight drop-shadow-sm truncate">
-                    Smart Curriculum
+                    SVSU Attendance APP
                   </h1>
                 </div>
               </div>

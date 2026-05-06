@@ -88,7 +88,7 @@ const ClassDetails = () => {
   const { profile } = useAuth();
   const qc = useQueryClient();
 
-  useEffect(() => { document.title = 'Class Details | Smart Curriculum'; }, []);
+  useEffect(() => { document.title = 'Class Details | SVSU Attendance APP'; }, []);
 
   const { data: classInfo, isLoading: classLoading, error: classError } = useQuery({
     queryKey: ['class', id],

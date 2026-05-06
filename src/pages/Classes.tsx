@@ -28,7 +28,7 @@ const Classes = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    document.title = 'Classes | Smart Curriculum';
+    document.title = 'Classes | SVSU Attendance APP';
   }, []);
 
   const { data: classes, isLoading, error } = useQuery({

@@ -77,8 +77,8 @@ const Auth = () => {
           <div className="mx-auto w-24 h-24 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 flex items-center justify-center mb-6 shadow-[0_0_40px_rgba(var(--primary),0.3)] animate-float p-3 transition-transform hover:scale-105">
             <img src="/logo.png" alt="App Logo" className="w-full h-full object-contain filter drop-shadow-xl" />
           </div>
-          <CardTitle className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-indigo-500 to-accent bg-clip-text text-transparent drop-shadow-sm">Smart Curriculum</CardTitle>
-          <CardDescription className="text-base mt-2 font-medium">Intelligent attendance & learning management</CardDescription>
+          <CardTitle className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-indigo-500 to-accent bg-clip-text text-transparent drop-shadow-sm">SVSU Attendance APP</CardTitle>
+          <CardDescription className="text-base mt-2 font-medium">Secure QR-based attendance tracking system</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin" className="w-full">

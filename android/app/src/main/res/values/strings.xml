@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">uni-face-attendance</string>
-    <string name="title_activity_main">uni-face-attendance</string>
+    <string name="app_name">SVSU Attendance APP</string>
+    <string name="title_activity_main">SVSU Attendance APP</string>
     <string name="package_name">app.lovable.fd0573f9bf0d4ed4b93e8014454fbeb1</string>
     <string name="custom_url_scheme">app.lovable.fd0573f9bf0d4ed4b93e8014454fbeb1</string>
 </resources>

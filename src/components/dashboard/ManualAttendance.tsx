@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { UserCheck } from 'lucide-react';
+import { UserCheck, Upload, FileText, X } from 'lucide-react';
 
 interface Student {
   id: string;
@@ -21,6 +21,8 @@ export default function ManualAttendance() {
   const [selectedClass, setSelectedClass] = useState<string>('');
   const [students, setStudents] = useState<Student[]>([]);
   const [selectedStudents, setSelectedStudents] = useState<Set<string>>(new Set());
+  const [studentStatuses, setStudentStatuses] = useState<Record<string, 'present' | 'leave'>>({});
+  const [studentProofs, setStudentProofs] = useState<Record<string, File | null>>({});
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -61,6 +63,10 @@ export default function ManualAttendance() {
         email: enrollment.profiles.email,
       }));
       setStudents(studentList);
+      // Initialize statuses to present
+      const statuses: Record<string, 'present' | 'leave'> = {};
+      studentList.forEach(s => statuses[s.id] = 'present');
+      setStudentStatuses(statuses);
     }
   };
 
@@ -72,6 +78,19 @@ export default function ManualAttendance() {
       newSelected.add(studentId);
     }
     setSelectedStudents(newSelected);
+  };
+
+  const handleStatusChange = (studentId: string, status: 'present' | 'leave') => {
+    setStudentStatuses(prev => ({ ...prev, [studentId]: status }));
+    if (status === 'present') {
+      const newProofs = { ...studentProofs };
+      delete newProofs[studentId];
+      setStudentProofs(newProofs);
+    }
+  };
+
+  const handleFileChange = (studentId: string, file: File | null) => {
+    setStudentProofs(prev => ({ ...prev, [studentId]: file }));
   };
 
   const toggleAll = () => {
@@ -109,11 +128,39 @@ export default function ManualAttendance() {
     }
 
     // Mark attendance for selected students
-    const attendanceRecords = Array.from(selectedStudents).map(studentId => ({
-      student_id: studentId,
-      session_id: sessionData.id,
-      marked_by: profile?.id,
-      is_manual: true,
+    const attendanceRecords = await Promise.all(Array.from(selectedStudents).map(async (studentId) => {
+      let proofUrl = null;
+      const proofFile = studentProofs[studentId];
+      const status = studentStatuses[studentId] || 'present';
+
+      if (status === 'leave' && proofFile) {
+        const fileExt = proofFile.name.split('.').pop();
+        const fileName = `${studentId}_${Date.now()}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('leave-proofs')
+          .upload(filePath, proofFile);
+
+        if (uploadError) {
+          console.error('Upload error:', uploadError);
+          toast.error(`Failed to upload proof for ${students.find(s => s.id === studentId)?.full_name}`);
+        } else {
+          const { data: urlData } = supabase.storage
+            .from('leave-proofs')
+            .getPublicUrl(filePath);
+          proofUrl = urlData.publicUrl;
+        }
+      }
+
+      return {
+        student_id: studentId,
+        session_id: sessionData.id,
+        marked_by: profile?.id,
+        is_manual: true,
+        status: status,
+        leave_proof_url: proofUrl,
+      };
     }));
 
     const { error } = await supabase
@@ -123,8 +170,9 @@ export default function ManualAttendance() {
     if (error) {
       toast.error('Failed to mark attendance');
     } else {
-      toast.success(`Marked ${selectedStudents.size} students present`);
+      toast.success(`Marked ${selectedStudents.size} students attendance`);
       setSelectedStudents(new Set());
+      setStudentProofs({});
     }
 
     setLoading(false);
@@ -175,6 +223,61 @@ export default function ManualAttendance() {
                       <p className="text-sm text-muted-foreground">
                         {student.student_id} • {student.email}
                       </p>
+                      
+                      {selectedStudents.has(student.id) && (
+                        <div className="mt-3 space-y-3 p-3 bg-muted/50 rounded-md" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex items-center gap-4">
+                            <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Status:</label>
+                            <Select 
+                              value={studentStatuses[student.id] || 'present'} 
+                              onValueChange={(val: 'present' | 'leave') => handleStatusChange(student.id, val)}
+                            >
+                              <SelectTrigger className="w-32 h-8 text-xs">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="present">Present</SelectItem>
+                                <SelectItem value="leave">Leave</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          {studentStatuses[student.id] === 'leave' && (
+                            <div className="space-y-2">
+                              <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Leave Proof:</label>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-8 gap-2 text-xs"
+                                  asChild
+                                >
+                                  <label className="cursor-pointer">
+                                    <Upload className="w-3 h-3" />
+                                    {studentProofs[student.id] ? 'Change Proof' : 'Upload Proof'}
+                                    <input
+                                      type="file"
+                                      className="hidden"
+                                      onChange={(e) => handleFileChange(student.id, e.target.files?.[0] || null)}
+                                      accept="image/*,.pdf"
+                                    />
+                                  </label>
+                                </Button>
+                                {studentProofs[student.id] && (
+                                  <div className="flex items-center gap-1 text-xs text-primary font-medium bg-primary/10 px-2 py-1 rounded">
+                                    <FileText className="w-3 h-3" />
+                                    <span className="max-w-[100px] truncate">{studentProofs[student.id]?.name}</span>
+                                    <X 
+                                      className="w-3 h-3 cursor-pointer hover:text-destructive" 
+                                      onClick={() => handleFileChange(student.id, null)}
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -184,10 +287,10 @@ export default function ManualAttendance() {
             <Button
               onClick={markAttendance}
               disabled={loading || selectedStudents.size === 0}
-              className="w-full"
+              className="w-full shadow-lg hover:shadow-primary/20 transition-all"
             >
               <UserCheck className="w-4 h-4 mr-2" />
-              Mark {selectedStudents.size} Student{selectedStudents.size !== 1 ? 's' : ''} Present
+              Submit Attendance for {selectedStudents.size} Student{selectedStudents.size !== 1 ? 's' : ''}
             </Button>
           </>
         )}

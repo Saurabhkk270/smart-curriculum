@@ -23,7 +23,8 @@ export const useBiometricAuth = () => {
   }, []);
 
   const checkBiometricAvailability = async () => {
-    const isNative = Capacitor.isNativePlatform();
+    const platform = Capacitor.getPlatform();
+    const isNative = platform === 'ios' || platform === 'android';
     
     if (!isNative) {
       setState(prev => ({ ...prev, isNative: false, isAvailable: false }));
@@ -59,7 +60,7 @@ export const useBiometricAuth = () => {
         reason: reason || 'Verify your identity to access the app',
         title: 'Biometric Authentication',
         subtitle: 'Use your fingerprint or face to continue',
-        description: 'Smart Curriculum requires biometric verification'
+        description: 'SVSU Attendance APP requires biometric verification'
       });
       setIsVerifying(false);
       return true;
@@ -77,7 +78,7 @@ export const useBiometricAuth = () => {
       await NativeBiometric.setCredentials({
         username,
         password,
-        server: 'smart-curriculum-app'
+        server: 'svsu-attendance-app'
       });
       return true;
     } catch (error) {
@@ -91,7 +92,7 @@ export const useBiometricAuth = () => {
 
     try {
       const credentials = await NativeBiometric.getCredentials({
-        server: 'smart-curriculum-app'
+        server: 'svsu-attendance-app'
       });
       return credentials;
     } catch (error) {
@@ -105,7 +106,7 @@ export const useBiometricAuth = () => {
 
     try {
       await NativeBiometric.deleteCredentials({
-        server: 'smart-curriculum-app'
+        server: 'svsu-attendance-app'
       });
       return true;
     } catch (error) {

@@ -7,8 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
-import { CheckCircle2, Search, Download } from 'lucide-react';
+import { CheckCircle2, Search, Download, Info, ExternalLink } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface AttendanceRecordsProps {
   studentId?: string;
@@ -108,7 +109,7 @@ const AttendanceRecords = ({ studentId }: AttendanceRecordsProps) => {
   }
 
   // Filter records based on search query, course, semester, and month
-  const filteredRecords = records.filter((record) => {
+  const filteredRecords = (records || []).filter((record) => {
     let matches = true;
     
     // Search filter
@@ -138,6 +139,17 @@ const AttendanceRecords = ({ studentId }: AttendanceRecordsProps) => {
     return matches;
   });
 
+  const getStats = () => {
+    let total = filteredRecords.length;
+    let present = filteredRecords.filter(r => (r.status || 'present') === 'present').length;
+    let leave = filteredRecords.filter(r => r.status === 'leave').length;
+    let percentage = total > 0 ? Math.round((present / total) * 100) : 0;
+
+    return { total, present, leave, percentage };
+  };
+
+  const { total, present, leave, percentage } = getStats();
+
   const exportToExcel = () => {
     const exportData = filteredRecords.map((record) => ({
       'Student Name': record.student?.full_name || 'Unknown',
@@ -149,7 +161,8 @@ const AttendanceRecords = ({ studentId }: AttendanceRecordsProps) => {
       'Date': format(new Date(record.marked_at), 'MMM dd, yyyy'),
       'Time': format(new Date(record.marked_at), 'hh:mm a'),
       'Method': record.is_manual ? 'Manual' : 'QR Code',
-      'Status': 'Present'
+      'Status': record.status === 'leave' ? 'Leave' : 'Present',
+      'Proof URL': record.leave_proof_url || '-'
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(exportData);
@@ -265,64 +278,137 @@ const AttendanceRecords = ({ studentId }: AttendanceRecordsProps) => {
               </div>
             </div>
             
-            <Button onClick={exportToExcel} className="gap-2" disabled={filteredRecords.length === 0}>
-              <Download className="w-4 h-4" />
-              Export Excel
-            </Button>
+            {profile?.role === 'teacher' && (
+              <Button onClick={exportToExcel} className="gap-2 shadow-lg hover:shadow-primary/20 transition-all" disabled={filteredRecords.length === 0}>
+                <Download className="w-4 h-4" />
+                Export Excel
+              </Button>
+            )}
           </div>
         </div>
       )}
+
+      {/* Summary Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <Card className="bg-primary/5 border-primary/20 shadow-sm overflow-hidden relative group">
+          <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
+            <CheckCircle2 className="w-8 h-8" />
+          </div>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Records</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{total}</div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-accent/5 border-accent/20 shadow-sm overflow-hidden relative group">
+          <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
+            <CheckCircle2 className="w-8 h-8" />
+          </div>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Present Days</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-accent">{present}</div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-orange-500/5 border-orange-500/20 shadow-sm overflow-hidden relative group">
+          <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
+            <CheckCircle2 className="w-8 h-8" />
+          </div>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Leave Days</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-orange-500">{leave}</div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-indigo-500/5 border-indigo-500/20 shadow-sm overflow-hidden relative group">
+          <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
+            <CheckCircle2 className="w-8 h-8" />
+          </div>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Attendance %</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-indigo-600">{percentage}%</div>
+          </CardContent>
+        </Card>
+      </div>
       
-      <div className="rounded-lg border border-border overflow-x-auto">
+      <div className="rounded-lg border border-border overflow-hidden bg-white shadow-sm">
         <Table>
-        <TableHeader>
-          <TableRow className="bg-muted">
-            {!studentId && <TableHead className="min-w-[150px]">Student</TableHead>}
-            <TableHead className="min-w-[150px]">Class</TableHead>
-            <TableHead className="min-w-[120px]">Date</TableHead>
-            <TableHead className="min-w-[100px]">Time</TableHead>
-            <TableHead className="min-w-[100px]">Method</TableHead>
-            <TableHead className="min-w-[100px]">Status</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {filteredRecords.map((record) => (
-            <TableRow key={record.id} className="hover:bg-muted/50">
-              {!studentId && (
+          <TableHeader>
+            <TableRow className="bg-muted/50">
+              {!studentId && <TableHead className="min-w-[150px]">Student</TableHead>}
+              <TableHead className="min-w-[150px]">Class</TableHead>
+              <TableHead className="min-w-[120px]">Date</TableHead>
+              <TableHead className="min-w-[100px]">Time</TableHead>
+              <TableHead className="min-w-[100px]">Method</TableHead>
+              <TableHead className="min-w-[120px]">Status</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredRecords.map((record) => (
+              <TableRow key={record.id} className="hover:bg-muted/30 transition-colors">
+                {!studentId && (
+                  <TableCell className="min-w-[150px]">
+                    <div>
+                      <p className="font-medium text-sm">{record.student?.full_name || 'Unknown'}</p>
+                      <p className="text-xs text-muted-foreground">{record.student?.student_id || '-'}</p>
+                    </div>
+                  </TableCell>
+                )}
                 <TableCell className="min-w-[150px]">
                   <div>
-                    <p className="font-medium text-sm">{record.student?.full_name || 'Unknown Student'}</p>
-                    <p className="text-xs text-muted-foreground">{record.student?.student_id || '-'}</p>
+                    <p className="font-medium text-sm">{record.session?.class?.name || 'Unknown'}</p>
+                    <p className="text-xs text-muted-foreground">{record.session?.class?.code || '-'}</p>
                   </div>
                 </TableCell>
-              )}
-              <TableCell className="min-w-[150px]">
-                <div>
-                  <p className="font-medium text-sm">{record.session?.class?.name || 'Unknown Class'}</p>
-                  <p className="text-xs text-muted-foreground">{record.session?.class?.code || '-'}</p>
-                </div>
-              </TableCell>
-              <TableCell className="min-w-[120px] text-sm">
-                {format(new Date(record.marked_at), 'MMM dd, yyyy')}
-              </TableCell>
-              <TableCell className="min-w-[100px] text-sm">
-                {format(new Date(record.marked_at), 'hh:mm a')}
-              </TableCell>
-              <TableCell className="min-w-[100px]">
-                <Badge variant={record.is_manual ? 'secondary' : 'default'} className="text-xs">
-                  {record.is_manual ? 'Manual' : 'QR Code'}
-                </Badge>
-              </TableCell>
-              <TableCell className="min-w-[100px]">
-                <div className="flex items-center gap-2 text-accent">
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span className="font-medium text-sm">Present</span>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+                <TableCell className="min-w-[120px] text-sm">
+                  {format(new Date(record.marked_at), 'MMM dd, yyyy')}
+                </TableCell>
+                <TableCell className="min-w-[100px] text-sm">
+                  {format(new Date(record.marked_at), 'hh:mm a')}
+                </TableCell>
+                <TableCell className="min-w-[100px]">
+                  <Badge variant={record.is_manual ? 'secondary' : 'default'} className="text-xs font-normal">
+                    {record.is_manual ? 'Manual' : 'QR Scan'}
+                  </Badge>
+                </TableCell>
+                <TableCell className="min-w-[120px]">
+                  {record.status === 'leave' ? (
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-1.5 text-orange-600 font-medium">
+                        <Info className="w-3.5 h-3.5" />
+                        <span className="text-sm">Leave</span>
+                      </div>
+                      {record.leave_proof_url && (
+                        <a 
+                          href={record.leave_proof_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-[10px] text-primary hover:underline flex items-center gap-0.5 ml-1"
+                        >
+                          <ExternalLink className="w-2.5 h-2.5" />
+                          View Proof
+                        </a>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1.5 text-accent font-medium">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span className="text-sm">Present</span>
+                    </div>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
     </div>
   );

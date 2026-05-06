@@ -22,26 +22,44 @@ export const BiometricGate = ({ children, onBypass }: BiometricGateProps) => {
   
   const { isLocked, unlock } = useInactivityTimer(600000); // 10 minutes
   const [isVerified, setIsVerified] = useState(false);
+  const [isBypassed, setIsBypassed] = useState(false);
   const [attemptCount, setAttemptCount] = useState(0);
 
   useEffect(() => {
     // Auto-trigger biometric on native platforms
-    if (isNative && isAvailable && !isVerified) {
+    if (isNative && isAvailable && !isVerified && !isBypassed) {
       handleBiometricVerification();
     }
-  }, [isNative, isAvailable]);
+  }, [isNative, isAvailable, isBypassed]);
+
+  // Safety timeout: If biometric check takes more than 5 seconds, allow manual bypass
+  useEffect(() => {
+    if (!isNative || !isAvailable) return;
+    
+    const timer = setTimeout(() => {
+      if (!isVerified) {
+        console.warn('Biometric check timed out, showing bypass option');
+      }
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [isVerified, isNative, isAvailable]);
 
   const handleBiometricVerification = async () => {
-    const success = await verifyBiometric('Unlock Smart Curriculum');
-    if (success) {
-      setIsVerified(true);
-    } else {
+    try {
+      const success = await verifyBiometric('Unlock SVSU Attendance APP');
+      if (success) {
+        setIsVerified(true);
+      } else {
+        setAttemptCount(prev => prev + 1);
+      }
+    } catch (e) {
+      console.error('Biometric verification error:', e);
       setAttemptCount(prev => prev + 1);
     }
   };
 
   // If not on native platform or biometric not available, show children directly
-  if (!isNative || !isAvailable) {
+  if (!isNative || !isAvailable || isBypassed) {
     return <>{children}</>;
   }
 
@@ -51,7 +69,7 @@ export const BiometricGate = ({ children, onBypass }: BiometricGateProps) => {
   }
 
   const handleUnlock = async () => {
-    const success = await verifyBiometric('Unlock Smart Curriculum');
+    const success = await verifyBiometric('Unlock SVSU Attendance APP');
     if (success) {
       setIsVerified(true);
       unlock();

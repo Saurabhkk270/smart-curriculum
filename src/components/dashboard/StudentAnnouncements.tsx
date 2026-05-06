@@ -18,6 +18,7 @@ interface Announcement {
   };
   profiles: {
     full_name: string;
+    role: string;
   };
 }
 
@@ -36,7 +37,7 @@ const StudentAnnouncements = () => {
       .select(`
         *,
         classes (name, code),
-        profiles (full_name)
+        profiles (full_name, role)
       `)
       .order('created_at', { ascending: false });
 
@@ -44,7 +45,9 @@ const StudentAnnouncements = () => {
       toast.error('Failed to fetch announcements');
       console.error(error);
     } else {
-      setAnnouncements(data || []);
+      // Filter only HOD (admin) announcements
+      const hodAnnouncements = (data || []).filter((a: any) => a.profiles?.role === 'admin');
+      setAnnouncements(hodAnnouncements);
     }
     setLoading(false);
   };
@@ -88,7 +91,7 @@ const StudentAnnouncements = () => {
                     {announcement.classes?.name || 'Unknown Class'} ({announcement.classes?.code || '-'})
                   </span>
                   <span>•</span>
-                  <span>By {announcement.profiles?.full_name || 'Unknown Teacher'}</span>
+                  <span>By HOD {announcement.profiles?.full_name || 'Unknown'}</span>
                 </div>
               </div>
               {announcement.deadline && (

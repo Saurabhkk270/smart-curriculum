@@ -72,6 +72,8 @@ export type Database = {
           scan_location: string | null
           session_id: string
           student_id: string
+          status: string | null
+          leave_proof_url: string | null
         }
         Insert: {
           device_info?: string | null
@@ -82,6 +84,8 @@ export type Database = {
           scan_location?: string | null
           session_id: string
           student_id: string
+          status?: string | null
+          leave_proof_url?: string | null
         }
         Update: {
           device_info?: string | null
@@ -92,6 +96,8 @@ export type Database = {
           scan_location?: string | null
           session_id?: string
           student_id?: string
+          status?: string | null
+          leave_proof_url?: string | null
         }
         Relationships: [
           {

@@ -13,6 +13,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
+import { cn } from '@/lib/utils';
 
 export function AppSidebar() {
   const { state, setOpenMobile } = useSidebar();
@@ -45,8 +46,8 @@ export function AppSidebar() {
   const isCollapsed = state === 'collapsed';
 
   return (
-    <Sidebar className={isCollapsed ? 'w-14' : 'w-60'} collapsible="icon">
-      <SidebarContent className="bg-transparent border-r border-border">
+    <Sidebar className={cn(isCollapsed ? 'w-14' : 'w-60', "bg-white")} collapsible="icon">
+      <SidebarContent className="bg-white border-r border-border">
         <SidebarGroup>
           <SidebarGroupLabel className="text-foreground font-semibold text-base">
             {!isCollapsed && (isTeacher ? 'Teacher Menu' : 'Student Menu')}
