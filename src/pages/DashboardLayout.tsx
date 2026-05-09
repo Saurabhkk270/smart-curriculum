@@ -1,12 +1,14 @@
 import { Outlet } from 'react-router-dom';
 import { useAuth } from '@/components/AuthProvider';
 import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
-import { Menu } from 'lucide-react';
+import { AlertTriangle, Menu } from 'lucide-react';
 const DashboardLayout = () => {
   const {
     profile,
+    authError,
     signOut
   } = useAuth();
   return <SidebarProvider>
@@ -43,6 +45,12 @@ const DashboardLayout = () => {
           {/* Main Content */}
           <main className="flex-1 overflow-auto">
             <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+              {authError && (
+                <Alert variant="destructive" className="mb-4">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription>{authError}</AlertDescription>
+                </Alert>
+              )}
               <Outlet />
             </div>
           </main>

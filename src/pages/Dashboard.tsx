@@ -5,7 +5,7 @@ import { Navigate } from 'react-router-dom';
 const Dashboard = () => {
   const { user, profile, signOut } = useAuth();
 
-  if (!profile || !user) {
+  if (!user) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
 

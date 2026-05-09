@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./components/AuthProvider";
 import { BiometricGate } from "./components/BiometricGate";
+import { RoleRoute } from "./components/RoleRoute";
 
 // Lazy load all page components
 const Auth = lazy(() => import("./pages/Auth"));
@@ -47,6 +48,8 @@ const AppRoutes = () => {
   }
 
   const isTeacher = profile?.role === 'teacher' || profile?.role === 'admin';
+  const teacherRoles = ['teacher', 'admin'] as const;
+  const studentRoles = ['student'] as const;
 
   return (
     <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
@@ -54,10 +57,10 @@ const AppRoutes = () => {
         <Route path="/auth" element={<Auth />} />
         <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
-          <Route path="classes" element={<TeacherClasses />} />
-          <Route path="students" element={<TeacherStudents />} />
-          <Route path="qr-code" element={<TeacherQRCode />} />
-          <Route path="manual" element={<TeacherManual />} />
+          <Route path="classes" element={<RoleRoute allow={[...teacherRoles]}><TeacherClasses /></RoleRoute>} />
+          <Route path="students" element={<RoleRoute allow={[...teacherRoles]}><TeacherStudents /></RoleRoute>} />
+          <Route path="qr-code" element={<RoleRoute allow={[...teacherRoles]}><TeacherQRCode /></RoleRoute>} />
+          <Route path="manual" element={<RoleRoute allow={[...teacherRoles]}><TeacherManual /></RoleRoute>} />
           <Route 
             path="timetable" 
             element={isTeacher ? <TeacherTimetable /> : <StudentTimetable />} 
@@ -70,8 +73,8 @@ const AppRoutes = () => {
             path="records" 
             element={isTeacher ? <TeacherRecords /> : <StudentRecords />} 
           />
-          <Route path="scanner" element={<StudentScanner />} />
-          <Route path="calendar" element={<StudentCalendar />} />
+          <Route path="scanner" element={<RoleRoute allow={[...studentRoles]}><StudentScanner /></RoleRoute>} />
+          <Route path="calendar" element={<RoleRoute allow={[...studentRoles]}><StudentCalendar /></RoleRoute>} />
         </Route>
         <Route path="/classes" element={<ProtectedRoute><Classes /></ProtectedRoute>} />
         <Route path="/classes/:id" element={<ProtectedRoute><ClassDetails /></ProtectedRoute>} />

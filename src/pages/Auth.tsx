@@ -9,6 +9,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { GraduationCap } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { supabaseConfigError } from '@/integrations/supabase/client';
+import { getSupabaseErrorMessage } from '@/lib/supabaseErrors';
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -34,7 +37,7 @@ const Auth = () => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
-      toast.error(error.message);
+      toast.error(getSupabaseErrorMessage(error, 'Unable to sign in.'));
     } else {
       toast.success('Welcome back!');
       navigate('/');
@@ -46,7 +49,7 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: signUpData.email,
       password: signUpData.password,
       options: {
@@ -62,10 +65,10 @@ const Auth = () => {
     });
 
     if (error) {
-      toast.error(error.message);
+      toast.error(getSupabaseErrorMessage(error, 'Unable to create your account.'));
     } else {
-      toast.success('Account created successfully!');
-      navigate('/');
+      toast.success(data.session ? 'Account created successfully!' : 'Account created. Check your email to confirm it before signing in.');
+      if (data.session) navigate('/');
     }
     setLoading(false);
   };
@@ -81,6 +84,11 @@ const Auth = () => {
           <CardDescription className="text-base mt-2 font-medium">Secure QR-based attendance tracking system</CardDescription>
         </CardHeader>
         <CardContent>
+          {supabaseConfigError && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertDescription>{supabaseConfigError}</AlertDescription>
+            </Alert>
+          )}
           <Tabs defaultValue="signin" className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="signin">Sign In</TabsTrigger>

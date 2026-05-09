@@ -70,7 +70,7 @@ const AttendanceCalendar = () => {
   const fetchAttendanceDays = async () => {
     setLoading(true);
     
-    let query = supabase
+    const query = supabase
       .from('attendance_records')
       .select(`
         marked_at,

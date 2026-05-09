@@ -64,6 +64,7 @@ const AttendanceRecords = ({ studentId }: AttendanceRecordsProps) => {
 
   const fetchRecords = async () => {
     setLoading(true);
+    const effectiveStudentId = studentId || (profile?.role === 'student' ? profile.id : undefined);
     
     let query = supabase
       .from('attendance_records')
@@ -77,10 +78,8 @@ const AttendanceRecords = ({ studentId }: AttendanceRecordsProps) => {
       `)
       .order('marked_at', { ascending: false });
 
-    if (studentId) {
-      query = query.eq('student_id', studentId);
-    } else if (selectedClass !== 'all') {
-      query = query.eq('session.class_id', selectedClass);
+    if (effectiveStudentId) {
+      query = query.eq('student_id', effectiveStudentId);
     }
 
     const { data, error } = await query;
@@ -140,10 +139,10 @@ const AttendanceRecords = ({ studentId }: AttendanceRecordsProps) => {
   });
 
   const getStats = () => {
-    let total = filteredRecords.length;
-    let present = filteredRecords.filter(r => (r.status || 'present') === 'present').length;
-    let leave = filteredRecords.filter(r => r.status === 'leave').length;
-    let percentage = total > 0 ? Math.round((present / total) * 100) : 0;
+    const total = filteredRecords.length;
+    const present = filteredRecords.filter(r => (r.status || 'present') === 'present').length;
+    const leave = filteredRecords.filter(r => r.status === 'leave').length;
+    const percentage = total > 0 ? Math.round((present / total) * 100) : 0;
 
     return { total, present, leave, percentage };
   };
