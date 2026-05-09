@@ -9,6 +9,10 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
+    "db:login": "npx supabase login",
+    "db:link": "npx supabase link",
+    "db:push": "npx supabase db push",
+    "db:status": "npx supabase migration list",
     "electron:start": "npm run build && npx cap copy electron && cd electron && npm run build && npx electron .",
     "electron:dev": "npx cap open electron"
   },
