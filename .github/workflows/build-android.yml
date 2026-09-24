@@ -1,0 +1,52 @@
+name: Build Android App
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: 'npm'
+
+    - name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+
+    - name: Install dependencies
+      run: npm ci || npm install
+
+    - name: Build web project
+      run: npm run build
+
+    - name: Sync Capacitor for Android
+      run: npx cap sync android
+
+    - name: Make gradlew executable
+      working-directory: ./android
+      run: chmod +x gradlew
+
+    - name: Build Android APK
+      working-directory: ./android
+      run: ./gradlew assembleDebug
+
+    - name: Upload Android Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: SVSU-Attendance-App-Android
+        path: android/app/build/outputs/apk/debug/app-debug.apk
+        if-no-files-found: warn

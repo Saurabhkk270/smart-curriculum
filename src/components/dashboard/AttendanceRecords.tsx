@@ -29,36 +29,48 @@ const AttendanceRecords = ({ studentId }: AttendanceRecordsProps) => {
   const [semesters, setSemesters] = useState<string[]>([]);
 
   useEffect(() => {
+    if (!profile) return; // Wait for profile to load before fetching
     if (!studentId && profile?.role === 'teacher') {
       fetchClasses();
       fetchCoursesAndSemesters();
     }
     fetchRecords();
-  }, [studentId, selectedClass, selectedCourse, selectedSemester, selectedMonth]);
+  }, [profile, studentId, selectedClass, selectedCourse, selectedSemester, selectedMonth]);
 
   const fetchCoursesAndSemesters = async () => {
-    const { data: profiles } = await supabase
-      .from('profiles')
-      .select('course, semester')
-      .eq('role', 'student');
-    
-    if (profiles) {
-      const uniqueCourses = [...new Set(profiles.map(p => p.course).filter(Boolean))] as string[];
-      const uniqueSemesters = [...new Set(profiles.map(p => p.semester).filter(Boolean))] as string[];
-      setCourses(uniqueCourses);
-      setSemesters(uniqueSemesters);
+    try {
+      const { data: profiles, error } = await supabase
+        .from('profiles')
+        .select('course, semester')
+        .eq('role', 'student');
+      
+      if (error) throw error;
+
+      if (profiles) {
+        const uniqueCourses = [...new Set(profiles.map(p => p.course).filter(Boolean))] as string[];
+        const uniqueSemesters = [...new Set(profiles.map(p => p.semester).filter(Boolean))] as string[];
+        setCourses(uniqueCourses);
+        setSemesters(uniqueSemesters);
+      }
+    } catch (error) {
+      console.error('Error fetching courses and semesters:', error);
     }
   };
 
   const fetchClasses = async () => {
-    const { data } = await supabase
-      .from('classes')
-      .select('*')
-      .eq('teacher_id', profile?.id)
-      .order('name');
-    
-    if (data) {
-      setClasses(data);
+    try {
+      const { data, error } = await supabase
+        .from('classes')
+        .select('*')
+        .eq('teacher_id', profile?.id)
+        .order('name');
+      
+      if (error) throw error;
+      if (data) {
+        setClasses(data);
+      }
+    } catch (error) {
+      console.error('Error fetching classes:', error);
     }
   };
 
@@ -66,45 +78,46 @@ const AttendanceRecords = ({ studentId }: AttendanceRecordsProps) => {
     setLoading(true);
     const effectiveStudentId = studentId || (profile?.role === 'student' ? profile.id : undefined);
     
-    let query = supabase
-      .from('attendance_records')
-      .select(`
-        *,
-        student:profiles!attendance_records_student_id_fkey(full_name, student_id, course, semester),
-        session:attendance_sessions(
+    try {
+      let query = supabase
+        .from('attendance_records')
+        .select(`
           *,
-          class:classes(name, code)
-        )
-      `)
-      .order('marked_at', { ascending: false });
+          student:profiles!attendance_records_student_id_fkey(full_name, student_id, course, semester),
+          session:attendance_sessions(
+            *,
+            class:classes(name, code)
+          )
+        `)
+        .order('marked_at', { ascending: false });
 
-    if (effectiveStudentId) {
-      query = query.eq('student_id', effectiveStudentId);
+      if (effectiveStudentId) {
+        query = query.eq('student_id', effectiveStudentId);
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+
+      if (data) {
+        // Filter by class on client side if needed (since we can't filter nested relations directly)
+        const filteredData = selectedClass === 'all' || studentId
+          ? data
+          : data.filter((record: any) => record.session?.class?.id === selectedClass || record.session?.class_id === selectedClass);
+        
+        setRecords(filteredData);
+      }
+    } catch (error: any) {
+      console.error('Error fetching attendance records:', error);
+      // We don't want to show a toast every time if it's just a background refresh,
+      // but for the initial load or explicit filters, it's helpful.
+    } finally {
+      setLoading(false);
     }
-
-    const { data, error } = await query;
-
-    if (!error && data) {
-      // Filter by class on client side if needed (since we can't filter nested relations directly)
-      const filteredData = selectedClass === 'all' || studentId
-        ? data
-        : data.filter((record: any) => record.session?.class?.id === selectedClass || record.session?.class_id === selectedClass);
-      
-      setRecords(filteredData);
-    }
-    setLoading(false);
   };
 
   if (loading) {
     return <div className="text-center py-8">Loading records...</div>;
-  }
-
-  if (records.length === 0) {
-    return (
-      <div className="text-center py-12 text-muted-foreground">
-        <p>No attendance records found.</p>
-      </div>
-    );
   }
 
   // Filter records based on search query, course, semester, and month
@@ -338,77 +351,83 @@ const AttendanceRecords = ({ studentId }: AttendanceRecordsProps) => {
         </Card>
       </div>
       
-      <div className="rounded-lg border border-border overflow-hidden bg-white shadow-sm">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-muted/50">
-              {!studentId && <TableHead className="min-w-[150px]">Student</TableHead>}
-              <TableHead className="min-w-[150px]">Class</TableHead>
-              <TableHead className="min-w-[120px]">Date</TableHead>
-              <TableHead className="min-w-[100px]">Time</TableHead>
-              <TableHead className="min-w-[100px]">Method</TableHead>
-              <TableHead className="min-w-[120px]">Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredRecords.map((record) => (
-              <TableRow key={record.id} className="hover:bg-muted/30 transition-colors">
-                {!studentId && (
+      {filteredRecords.length === 0 ? (
+        <div className="text-center py-12 text-muted-foreground bg-white rounded-lg border border-border shadow-sm">
+          <p>No attendance records found.</p>
+        </div>
+      ) : (
+        <div className="rounded-lg border border-border overflow-hidden bg-white shadow-sm">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/50">
+                {!studentId && <TableHead className="min-w-[150px]">Student</TableHead>}
+                <TableHead className="min-w-[150px]">Class</TableHead>
+                <TableHead className="min-w-[120px]">Date</TableHead>
+                <TableHead className="min-w-[100px]">Time</TableHead>
+                <TableHead className="min-w-[100px]">Method</TableHead>
+                <TableHead className="min-w-[120px]">Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredRecords.map((record) => (
+                <TableRow key={record.id} className="hover:bg-muted/30 transition-colors">
+                  {!studentId && (
+                    <TableCell className="min-w-[150px]">
+                      <div>
+                        <p className="font-medium text-sm">{record.student?.full_name || 'Unknown'}</p>
+                        <p className="text-xs text-muted-foreground">{record.student?.student_id || '-'}</p>
+                      </div>
+                    </TableCell>
+                  )}
                   <TableCell className="min-w-[150px]">
                     <div>
-                      <p className="font-medium text-sm">{record.student?.full_name || 'Unknown'}</p>
-                      <p className="text-xs text-muted-foreground">{record.student?.student_id || '-'}</p>
+                      <p className="font-medium text-sm">{record.session?.class?.name || 'Unknown'}</p>
+                      <p className="text-xs text-muted-foreground">{record.session?.class?.code || '-'}</p>
                     </div>
                   </TableCell>
-                )}
-                <TableCell className="min-w-[150px]">
-                  <div>
-                    <p className="font-medium text-sm">{record.session?.class?.name || 'Unknown'}</p>
-                    <p className="text-xs text-muted-foreground">{record.session?.class?.code || '-'}</p>
-                  </div>
-                </TableCell>
-                <TableCell className="min-w-[120px] text-sm">
-                  {format(new Date(record.marked_at), 'MMM dd, yyyy')}
-                </TableCell>
-                <TableCell className="min-w-[100px] text-sm">
-                  {format(new Date(record.marked_at), 'hh:mm a')}
-                </TableCell>
-                <TableCell className="min-w-[100px]">
-                  <Badge variant={record.is_manual ? 'secondary' : 'default'} className="text-xs font-normal">
-                    {record.is_manual ? 'Manual' : 'QR Scan'}
-                  </Badge>
-                </TableCell>
-                <TableCell className="min-w-[120px]">
-                  {record.status === 'leave' ? (
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-1.5 text-orange-600 font-medium">
-                        <Info className="w-3.5 h-3.5" />
-                        <span className="text-sm">Leave</span>
+                  <TableCell className="min-w-[120px] text-sm">
+                    {format(new Date(record.marked_at), 'MMM dd, yyyy')}
+                  </TableCell>
+                  <TableCell className="min-w-[100px] text-sm">
+                    {format(new Date(record.marked_at), 'hh:mm a')}
+                  </TableCell>
+                  <TableCell className="min-w-[100px]">
+                    <Badge variant={record.is_manual ? 'secondary' : 'default'} className="text-xs font-normal">
+                      {record.is_manual ? 'Manual' : 'QR Scan'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="min-w-[120px]">
+                    {record.status === 'leave' ? (
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-1.5 text-orange-600 font-medium">
+                          <Info className="w-3.5 h-3.5" />
+                          <span className="text-sm">Leave</span>
+                        </div>
+                        {record.leave_proof_url && (
+                          <a 
+                            href={record.leave_proof_url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-[10px] text-primary hover:underline flex items-center gap-0.5 ml-1"
+                          >
+                            <ExternalLink className="w-2.5 h-2.5" />
+                            View Proof
+                          </a>
+                        )}
                       </div>
-                      {record.leave_proof_url && (
-                        <a 
-                          href={record.leave_proof_url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-[10px] text-primary hover:underline flex items-center gap-0.5 ml-1"
-                        >
-                          <ExternalLink className="w-2.5 h-2.5" />
-                          View Proof
-                        </a>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1.5 text-accent font-medium">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      <span className="text-sm">Present</span>
-                    </div>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+                    ) : (
+                      <div className="flex items-center gap-1.5 text-accent font-medium">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span className="text-sm">Present</span>
+                      </div>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
     </div>
   );
 };

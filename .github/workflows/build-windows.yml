@@ -1,0 +1,46 @@
+name: Build Windows App
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci || npm install
+
+    - name: Build web project
+      run: npm run build
+
+    - name: Sync Capacitor for Electron
+      run: npx cap copy electron
+
+    - name: Install electron dependencies
+      working-directory: ./electron
+      run: npm ci || npm install
+
+    - name: Build Electron App
+      working-directory: ./electron
+      run: npm run electron:make
+
+    - name: Upload Windows Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: SVSU-Attendance-App-Windows
+        path: electron/dist/SVSU-Attendance-APP-Setup.exe
+        if-no-files-found: warn

@@ -101,6 +101,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         );
       }
     } catch (err) {
+      console.error('Error in fetchProfile:', err);
       setProfile(createProfileFromUser(activeUser));
       setAuthError(getSupabaseErrorMessage(err, 'Unable to connect to the attendance database.'));
     } finally {

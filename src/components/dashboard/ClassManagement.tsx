@@ -15,19 +15,25 @@ const ClassManagement = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetchClasses();
-  }, []);
+    if (profile?.id) fetchClasses();
+  }, [profile]);
 
   const fetchClasses = async () => {
-    const { data } = await supabase
-      .from('classes')
-      .select(`
-        *,
-        class_enrollments(count)
-      `)
-      .eq('teacher_id', profile?.id);
-    
-    if (data) setClasses(data);
+    try {
+      const { data, error } = await supabase
+        .from('classes')
+        .select(`
+          *,
+          class_enrollments(count)
+        `)
+        .eq('teacher_id', profile?.id);
+      
+      if (error) throw error;
+      if (data) setClasses(data);
+    } catch (error) {
+      console.error('Error fetching classes:', error);
+      toast.error('Failed to load classes');
+    }
   };
 
   const createClass = async (e: React.FormEvent) => {

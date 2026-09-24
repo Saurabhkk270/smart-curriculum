@@ -19,8 +19,8 @@ const QRGenerator = () => {
   const intervalRef = useRef<number | null>(null);
 
   useEffect(() => {
-    fetchClasses();
-  }, []);
+    if (profile?.id) fetchClasses();
+  }, [profile]);
 
   const fetchClasses = async () => {
     const { data } = await supabase

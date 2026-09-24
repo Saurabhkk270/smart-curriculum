@@ -18,8 +18,8 @@ const StudentEnrollment = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetchClasses();
-  }, []);
+    if (profile?.id) fetchClasses();
+  }, [profile]);
 
   useEffect(() => {
     if (selectedClass) {
