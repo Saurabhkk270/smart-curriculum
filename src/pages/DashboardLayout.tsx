@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import { useAuth } from '@/components/AuthProvider';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
@@ -33,7 +34,10 @@ const DashboardLayout = () => {
                   </h1>
                 </div>
               </div>
-              <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+              <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 text-xs hidden sm:inline-flex">
+                  Student Preview
+                </Badge>
                 <span className="text-xs sm:text-sm font-medium hidden md:inline">{profile?.full_name}</span>
                 <Button variant="outline" size="sm" onClick={signOut} className="text-xs sm:text-sm h-8 px-2 sm:px-3">
                   Sign Out

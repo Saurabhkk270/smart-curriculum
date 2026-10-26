@@ -8,6 +8,39 @@ import { useNavigate } from 'react-router-dom';
 type Profile = Tables<'profiles'>;
 type UserRole = Profile['role'];
 
+export const DEMO_STUDENT_USER: User = {
+  id: '00000000-0000-0000-0000-000000000001',
+  app_metadata: {},
+  user_metadata: {
+    full_name: 'Rahul Sharma',
+    role: 'student',
+    student_id: '2026-CSE-001',
+    course: 'B.Tech CSE',
+    semester: 'Semester 5',
+  },
+  aud: 'authenticated',
+  created_at: new Date().toISOString(),
+  email: 'student.preview@svsu.ac.in',
+} as unknown as User;
+
+export const DEMO_STUDENT_PROFILE: Profile = {
+  id: '00000000-0000-0000-0000-000000000001',
+  email: 'student.preview@svsu.ac.in',
+  full_name: 'Rahul Sharma',
+  student_id: '2026-CSE-001',
+  roll_no: '2301042',
+  role: 'student',
+  account_status: 'active',
+  branch: 'Computer Science & Engineering',
+  course: 'B.Tech CSE',
+  semester: 'Semester 5',
+  section: 'A',
+  admission_year: 2024,
+  phone_number: '+91 9876543210',
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+};
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
@@ -16,16 +49,18 @@ interface AuthContextType {
   authError: string | null;
   refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
+  loginAsStudentPreview: () => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
-  user: null,
+  user: DEMO_STUDENT_USER,
   session: null,
-  profile: null,
-  loading: true,
+  profile: DEMO_STUDENT_PROFILE,
+  loading: false,
   authError: null,
   refreshProfile: async () => {},
   signOut: async () => {},
+  loginAsStudentPreview: () => {},
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -45,6 +80,12 @@ const createProfileFromUser = (user: User): Profile => ({
   email: user.email || '',
   full_name: getMetadataString(user, 'full_name') || user.email || 'User',
   student_id: getMetadataString(user, 'student_id') || null,
+  roll_no: null,
+  account_status: 'active',
+  branch: null,
+  section: null,
+  admission_year: null,
+  phone_number: null,
   role: getMetadataRole(user),
   course: getMetadataString(user, 'course') || null,
   semester: getMetadataString(user, 'semester') || null,
@@ -53,11 +94,12 @@ const createProfileFromUser = (user: User): Profile => ({
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  // Direct default preview into student without requiring login!
+  const [user, setUser] = useState<User | null>(DEMO_STUDENT_USER);
   const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [authError, setAuthError] = useState<string | null>(supabaseConfigError);
+  const [profile, setProfile] = useState<Profile | null>(DEMO_STUDENT_PROFILE);
+  const [loading, setLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const fetchProfile = useCallback(async (activeUser: User) => {
@@ -70,7 +112,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (data) {
         setProfile(data);
-        setAuthError(supabaseConfigError);
+        setAuthError(null);
         return;
       }
 
@@ -82,7 +124,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
 
-      const { data: repairedProfile, error: repairError } = await supabase
+      const { data: repairedProfile } = await supabase
         .from('profiles')
         .upsert(fallbackProfile, { onConflict: 'id' })
         .select('*')
@@ -93,12 +135,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setAuthError(null);
       } else {
         setProfile(fallbackProfile);
-        setAuthError(
-          getSupabaseErrorMessage(
-            repairError,
-            'Your account exists, but the profile row could not be created. Please ask an admin to apply the latest Supabase migrations.',
-          ),
-        );
       }
     } catch (err) {
       console.error('Error in fetchProfile:', err);
@@ -111,33 +147,44 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
+      (event, currentSession) => {
+        setSession(currentSession);
         
-        if (session?.user) {
+        if (currentSession?.user) {
+          setUser(currentSession.user);
           setTimeout(() => {
-            fetchProfile(session.user);
+            fetchProfile(currentSession.user);
           }, 0);
-        } else {
+        } else if (event === 'SIGNED_OUT') {
+          // If explicit sign out, clear to null so user can sign into another account
+          setUser(null);
           setProfile(null);
-          setAuthError(supabaseConfigError);
+          setLoading(false);
+        } else {
+          // Default to student preview
+          setUser(DEMO_STUDENT_USER);
+          setProfile(DEMO_STUDENT_PROFILE);
           setLoading(false);
         }
       }
     );
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
+    supabase.auth.getSession().then(({ data: { session: existingSession } }) => {
+      setSession(existingSession);
       
-      if (session?.user) {
-        fetchProfile(session.user);
+      if (existingSession?.user) {
+        setUser(existingSession.user);
+        fetchProfile(existingSession.user);
       } else {
+        // Default to student preview
+        setUser(DEMO_STUDENT_USER);
+        setProfile(DEMO_STUDENT_PROFILE);
         setLoading(false);
       }
-    }).catch((err) => {
-      setAuthError(getSupabaseErrorMessage(err, 'Unable to restore your login session.'));
+    }).catch(() => {
+      // In offline or preview mode, keep default student
+      setUser(DEMO_STUDENT_USER);
+      setProfile(DEMO_STUDENT_PROFILE);
       setLoading(false);
     });
 
@@ -145,17 +192,31 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [fetchProfile]);
 
   const refreshProfile = async () => {
-    if (user) await fetchProfile(user);
+    if (user && user.id !== DEMO_STUDENT_USER.id) {
+      await fetchProfile(user);
+    }
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch {
+      // ignore
+    }
+    setUser(null);
     setProfile(null);
     navigate('/auth');
   };
 
+  const loginAsStudentPreview = () => {
+    setUser(DEMO_STUDENT_USER);
+    setProfile(DEMO_STUDENT_PROFILE);
+    setAuthError(null);
+    navigate('/dashboard/scanner');
+  };
+
   return (
-    <AuthContext.Provider value={{ user, session, profile, loading, authError, refreshProfile, signOut }}>
+    <AuthContext.Provider value={{ user, session, profile, loading, authError, refreshProfile, signOut, loginAsStudentPreview }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/components/AuthProvider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { GraduationCap } from 'lucide-react';
+import { GraduationCap, QrCode } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabaseConfigError } from '@/integrations/supabase/client';
@@ -15,6 +16,7 @@ import { getSupabaseErrorMessage } from '@/lib/supabaseErrors';
 
 const Auth = () => {
   const navigate = useNavigate();
+  const { loginAsStudentPreview } = useAuth();
   const [loading, setLoading] = useState(false);
   const [signUpData, setSignUpData] = useState({
     email: '',
@@ -89,6 +91,26 @@ const Auth = () => {
               <AlertDescription>{supabaseConfigError}</AlertDescription>
             </Alert>
           )}
+
+          <div className="mb-6">
+            <Button
+              type="button"
+              className="w-full bg-gradient-to-r from-primary to-indigo-600 hover:from-primary/90 hover:to-indigo-700 text-white font-semibold py-5 shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm"
+              onClick={loginAsStudentPreview}
+            >
+              <QrCode className="h-4 w-4" />
+              Direct Student Preview (No Login Required)
+            </Button>
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground font-medium">Or Use Credentials</span>
+              </div>
+            </div>
+          </div>
+
           <Tabs defaultValue="signin" className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="signin">Sign In</TabsTrigger>
