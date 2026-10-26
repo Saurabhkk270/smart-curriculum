@@ -19,8 +19,12 @@ const Dashboard = () => {
   }
 
   // Redirect to first section based on role
-  const isTeacher = profile.role === 'teacher' || profile.role === 'admin';
-  const defaultPath = isTeacher ? '/dashboard/classes' : '/dashboard/scanner';
+  let defaultPath = '/dashboard/scanner';
+  if (profile.role === 'admin') {
+    defaultPath = '/admin';
+  } else if (profile.role === 'teacher') {
+    defaultPath = '/dashboard/classes';
+  }
   
   return <Navigate to={defaultPath} replace />;
 };

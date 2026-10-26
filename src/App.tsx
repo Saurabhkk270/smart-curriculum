@@ -27,6 +27,24 @@ const StudentCalendar = lazy(() => import("./pages/student/StudentCalendar"));
 const StudentTimetable = lazy(() => import("./pages/student/StudentTimetable"));
 const StudentAnnouncements = lazy(() => import("./pages/student/StudentAnnouncements"));
 const StudentRecords = lazy(() => import("./pages/student/StudentRecords"));
+const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const AdminStudents = lazy(() => import("./pages/admin/AdminStudents"));
+const AdminTeachers = lazy(() => import("./pages/admin/AdminTeachers"));
+const AdminImports = lazy(() => import("./pages/admin/AdminImports"));
+const AdminAcademics = lazy(() => import("./pages/admin/AdminAcademics"));
+const AdminNotices = lazy(() => import("./pages/admin/AdminNotices"));
+const AdminMessages = lazy(() => import("./pages/admin/AdminMessages"));
+const AdminExaminations = lazy(() => import("./pages/admin/AdminExaminations"));
+const AdminProgress = lazy(() => import("./pages/admin/AdminProgress"));
+const AdminTimetable = lazy(() => import("./pages/admin/AdminTimetable"));
+const AdminAttendance = lazy(() => import("./pages/admin/AdminAttendance"));
+const AdminGroups = lazy(() => import("./pages/admin/AdminGroups"));
+const AdminGallery = lazy(() => import("./pages/admin/AdminGallery"));
+const AdminFeedback = lazy(() => import("./pages/admin/AdminFeedback"));
+const AdminAI = lazy(() => import("./pages/admin/AdminAI"));
+const AdminActivity = lazy(() => import("./pages/admin/AdminActivity"));
+const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
 
 const queryClient = new QueryClient();
 
@@ -75,6 +93,25 @@ const AppRoutes = () => {
           />
           <Route path="scanner" element={<RoleRoute allow={[...studentRoles]}><StudentScanner /></RoleRoute>} />
           <Route path="calendar" element={<RoleRoute allow={[...studentRoles]}><StudentCalendar /></RoleRoute>} />
+        </Route>
+        <Route path="/admin" element={<ProtectedRoute><RoleRoute allow={['admin']}><AdminLayout /></RoleRoute></ProtectedRoute>}>
+          <Route index element={<AdminDashboard />} />
+          <Route path="students" element={<AdminStudents />} />
+          <Route path="teachers" element={<AdminTeachers />} />
+          <Route path="academics" element={<AdminAcademics />} />
+          <Route path="timetable" element={<AdminTimetable />} />
+          <Route path="attendance" element={<AdminAttendance />} />
+          <Route path="examinations" element={<AdminExaminations />} />
+          <Route path="progress" element={<AdminProgress />} />
+          <Route path="groups" element={<AdminGroups />} />
+          <Route path="messages" element={<AdminMessages />} />
+          <Route path="notices" element={<AdminNotices />} />
+          <Route path="gallery" element={<AdminGallery />} />
+          <Route path="feedback" element={<AdminFeedback />} />
+          <Route path="imports" element={<AdminImports />} />
+          <Route path="ai" element={<AdminAI />} />
+          <Route path="activity" element={<AdminActivity />} />
+          <Route path="settings" element={<AdminSettings />} />
         </Route>
         <Route path="/classes" element={<ProtectedRoute><Classes /></ProtectedRoute>} />
         <Route path="/classes/:id" element={<ProtectedRoute><ClassDetails /></ProtectedRoute>} />
