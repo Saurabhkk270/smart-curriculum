@@ -94,59 +94,110 @@ export function AppSidebar() {
   const menuTitle = role === 'admin' ? 'Admin Portal' : role === 'teacher' ? 'Faculty Menu' : 'Student Menu';
   const roleBadge = role === 'admin' ? 'Administrator' : role === 'teacher' ? 'Faculty' : 'Student';
 
+  // Dynamic Icon color based on title
+  const getIconColor = (title: string, isActive: boolean) => {
+    if (isActive) return "text-white";
+    if (title.includes("Scanner") || title.includes("QR")) return "text-cyan-400";
+    if (title.includes("Calendar") || title.includes("Classes")) return "text-emerald-400";
+    if (title.includes("Timetable")) return "text-amber-400";
+    if (title.includes("Announcements") || title.includes("Notices")) return "text-rose-400";
+    if (title.includes("Records") || title.includes("Progress")) return "text-indigo-400";
+    return "text-blue-400";
+  };
+
   return (
-    <Sidebar className={cn(isCollapsed ? 'w-14' : 'w-64', "bg-white border-r border-slate-200")} collapsible="icon">
-      <SidebarContent className="bg-white overflow-y-auto">
+    <Sidebar className={cn(isCollapsed ? 'w-16' : 'w-64', "bg-slate-950 border-r border-slate-800/80 text-slate-100 flex flex-col")} collapsible="icon">
+      <SidebarContent className="bg-slate-950 text-slate-100 overflow-y-auto flex-1">
         <SidebarGroup>
-          <div className="px-3 py-3 border-b border-slate-200 mb-2 flex items-center justify-between bg-slate-50/70">
+          {/* Institutional Top Header */}
+          <div className="px-3 py-3.5 border-b border-slate-800/90 mb-3 bg-slate-900/60 rounded-lg mx-2 mt-2">
             {!isCollapsed ? (
-              <div className="flex items-center gap-2 w-full justify-between">
-                <div className="flex items-center gap-2">
-                  <img src="/logo.png" alt="SVSU" className="h-6 w-6 object-contain" />
-                  <div>
-                    <span className="text-xs font-bold text-slate-900 tracking-tight block leading-none">
-                      {role === 'admin' ? 'Admin Suite' : role === 'teacher' ? 'Faculty Portal' : 'Student Portal'}
+              <div className="flex items-center gap-3 w-full justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="h-9 w-9 rounded-lg bg-white p-1 flex items-center justify-center shrink-0 shadow-md">
+                    <img src="/logo.png" alt="SVSU" className="h-full w-full object-contain" />
+                  </div>
+                  <div className="overflow-hidden">
+                    <span className="text-xs font-black text-white tracking-tight block leading-tight truncate">
+                      {role === 'admin' ? 'SVSU Admin Suite' : role === 'teacher' ? 'Faculty Academic Portal' : 'Student ERP Portal'}
                     </span>
-                    <span className="text-[10px] text-slate-500 font-medium">SVSU ERP</span>
+                    <span className="text-[10px] text-amber-400 font-semibold tracking-wide">
+                      Haryana Skill University
+                    </span>
                   </div>
                 </div>
                 <Badge 
-                  variant="outline"
                   className={cn(
-                    "text-[10px] font-semibold",
-                    role === 'admin' ? 'bg-slate-900 text-white border-slate-900' : role === 'teacher' ? 'bg-blue-50 text-blue-800 border-blue-200' : 'bg-slate-100 text-slate-700 border-slate-300'
+                    "text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 border-0",
+                    role === 'admin' ? 'bg-purple-600 text-white' : role === 'teacher' ? 'bg-emerald-600 text-white' : 'bg-blue-600 text-white'
                   )}
                 >
                   {roleBadge}
                 </Badge>
               </div>
             ) : (
-              <div className="mx-auto">
-                <img src="/logo.png" alt="SVSU" className="h-6 w-6 object-contain" />
+              <div className="mx-auto flex justify-center">
+                <img src="/logo.png" alt="SVSU" className="h-7 w-7 object-contain bg-white rounded p-0.5" />
               </div>
             )}
           </div>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild className="text-slate-700 hover:bg-slate-100 hover:text-slate-900">
-                    <NavLink
-                      to={item.url}
-                      className="flex items-center gap-2.5 w-full rounded-md px-2.5 py-1.5 transition-colors"
-                      activeClassName="bg-blue-700 text-white font-semibold hover:bg-blue-700 hover:text-white shadow-xs"
-                      onClick={() => setOpenMobile(false)}
-                    >
-                      <item.icon className="h-4 w-4 flex-shrink-0" />
-                      {!isCollapsed && <span className="text-xs">{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+
+          <div className="px-3 pb-1 pt-2">
+            {!isCollapsed && (
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 block px-1">
+                {role === 'admin' ? 'University Modules' : role === 'teacher' ? 'Instructional Tools' : 'Academic Services'}
+              </span>
+            )}
+          </div>
+
+          <SidebarGroupContent className="px-1 mt-1">
+            <SidebarMenu className="space-y-1">
+              {items.map((item) => {
+                const isActive = location.pathname === item.url;
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild className="rounded-lg transition-all">
+                      <NavLink
+                        to={item.url}
+                        className={cn(
+                          "flex items-center gap-3 w-full rounded-lg px-3 py-2 text-xs font-medium transition-all",
+                          isActive 
+                            ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold shadow-lg shadow-blue-950/60 ring-1 ring-blue-400/40" 
+                            : "text-slate-300 hover:text-white hover:bg-slate-900/90"
+                        )}
+                        onClick={() => setOpenMobile(false)}
+                      >
+                        <item.icon className={cn("h-4 w-4 shrink-0 transition-colors", getIconColor(item.title, isActive))} />
+                        {!isCollapsed && <span className="truncate">{item.title}</span>}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      {/* Mini Profile Footer at bottom of sidebar */}
+      {!isCollapsed && (
+        <div className="p-3 border-t border-slate-800 bg-slate-900/70 m-2 rounded-xl">
+          <div className="flex items-center gap-2.5">
+            <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center text-xs font-bold shrink-0 shadow-sm border border-white/20">
+              {profile?.full_name ? profile.full_name.substring(0, 2).toUpperCase() : 'SK'}
+            </div>
+            <div className="overflow-hidden flex-1">
+              <span className="text-xs font-bold text-white block truncate leading-tight">
+                {profile?.full_name || 'Saurabh Kakkar'}
+              </span>
+              <span className="text-[10px] text-amber-300/90 font-mono block truncate">
+                {profile?.student_id || '25UGCSE151'}
+              </span>
+            </div>
+            <span className="h-2 w-2 rounded-full bg-emerald-400 shrink-0 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+          </div>
+        </div>
+      )}
     </Sidebar>
   );
 }

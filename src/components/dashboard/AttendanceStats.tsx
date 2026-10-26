@@ -76,107 +76,138 @@ const AttendanceStats = () => {
     }
   };
 
-  const isLowAttendance = attendancePercentage < 75;
+  const isLowAttendance = totalSessionsCount > 0 && attendancePercentage < 75;
+  const classesNeeded = isLowAttendance ? Math.ceil((0.75 * totalSessionsCount - attendedSessionsCount) / (1 - 0.75)) : 0;
 
   return (
     <div className="space-y-4">
-      {/* Executive Academic Metrics Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {/* Metric 1: Overall Percentage */}
-        <Card className="border border-slate-200 bg-white shadow-xs">
-          <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+      {/* 4 Colorful Executive Metric Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Metric 1: Overall Percentage (Royal Blue / Sapphire) */}
+        <Card className="border border-slate-200/80 bg-white shadow-sm overflow-hidden relative group hover:shadow-md transition-shadow">
+          <div className="h-1 bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500" />
+          <CardHeader className="pb-2 pt-4 px-4 flex flex-row items-center justify-between space-y-0">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
               Attendance Compliance
             </span>
-            <div className={`h-7 w-7 rounded-md flex items-center justify-center ${isLowAttendance ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-600'}`}>
+            <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${isLowAttendance ? 'bg-amber-100 text-amber-700' : 'bg-blue-50 text-blue-700'}`}>
               <TrendingUp className="h-4 w-4" />
             </div>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="px-4 pb-4 space-y-2">
             <div className="flex items-baseline justify-between">
-              <span className={`text-3xl font-extrabold tracking-tight ${isLowAttendance ? 'text-red-600' : 'text-slate-900'}`}>
+              <span className={`text-3xl font-black tracking-tight ${isLowAttendance ? 'text-amber-600' : 'text-slate-900'}`}>
                 {attendancePercentage}%
               </span>
-              <Badge variant="outline" className={`text-xs ${isLowAttendance ? 'border-red-200 text-red-700 bg-red-50' : 'border-emerald-200 text-emerald-700 bg-emerald-50'}`}>
-                {isLowAttendance ? 'Shortfall' : 'Good Standing'}
+              <Badge className={`text-[10px] font-semibold px-2 py-0.5 ${isLowAttendance ? 'bg-amber-100 text-amber-800 border-amber-300' : 'bg-emerald-100 text-emerald-800 border-emerald-300'}`}>
+                {isLowAttendance ? 'Below 75%' : 'Good Standing'}
               </Badge>
             </div>
             <Progress
               value={attendancePercentage}
-              className={`h-2 bg-slate-100 ${isLowAttendance ? '[&>div]:bg-red-500' : '[&>div]:bg-emerald-600'}`}
+              className={`h-2 rounded-full bg-slate-100 ${isLowAttendance ? '[&>div]:bg-amber-500' : '[&>div]:bg-gradient-to-r [&>div]:from-blue-600 [&>div]:to-indigo-600'}`}
             />
-            <div className="flex justify-between text-[11px] text-slate-500">
+            <div className="flex justify-between text-[11px] text-slate-500 font-medium">
               <span>Mandatory: 75%</span>
-              <span className="font-semibold text-slate-700">
-                {isLowAttendance ? `${75 - attendancePercentage}% needed` : 'Threshold Satisfied'}
+              <span className={isLowAttendance ? 'text-amber-700 font-semibold' : 'text-emerald-700 font-semibold'}>
+                {isLowAttendance ? `${75 - attendancePercentage}% to target` : 'Compliant ✓'}
               </span>
             </div>
           </CardContent>
         </Card>
 
-        {/* Metric 2: Lectures Attended */}
-        <Card className="border border-slate-200 bg-white shadow-xs">
-          <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Attended Lectures
+        {/* Metric 2: Attended Lectures (Emerald Green) */}
+        <Card className="border border-slate-200/80 bg-white shadow-sm overflow-hidden relative group hover:shadow-md transition-shadow">
+          <div className="h-1 bg-gradient-to-r from-emerald-500 to-teal-600" />
+          <CardHeader className="pb-2 pt-4 px-4 flex flex-row items-center justify-between space-y-0">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+              Classes Attended
             </span>
-            <div className="h-7 w-7 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center">
+            <div className="h-8 w-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
               <CalendarCheck className="h-4 w-4" />
             </div>
           </CardHeader>
-          <CardContent className="space-y-1">
-            <div className="text-3xl font-extrabold text-slate-900">
+          <CardContent className="px-4 pb-4 space-y-1">
+            <div className="text-3xl font-black text-slate-900">
               {attendedSessionsCount}
-              <span className="text-base font-normal text-slate-400"> / {totalSessionsCount}</span>
+              <span className="text-sm font-semibold text-slate-400"> / {totalSessionsCount}</span>
             </div>
-            <p className="text-xs text-slate-500">
-              Verified sessions logged this term
+            <p className="text-xs text-slate-500 font-medium pt-1">
+              {totalSessionsCount === 0 ? 'No sessions scheduled yet' : `${attendedSessionsCount} verified lecture hours logged`}
             </p>
           </CardContent>
         </Card>
 
-        {/* Metric 3: Exam Eligibility Status */}
-        <Card className="border border-slate-200 bg-white shadow-xs">
-          <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Examination Clearance
+        {/* Metric 3: Exam Eligibility Status (Royal Purple / Indigo) */}
+        <Card className="border border-slate-200/80 bg-white shadow-sm overflow-hidden relative group hover:shadow-md transition-shadow">
+          <div className="h-1 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600" />
+          <CardHeader className="pb-2 pt-4 px-4 flex flex-row items-center justify-between space-y-0">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+              Exam Admit Card
             </span>
-            <div className={`h-7 w-7 rounded-md flex items-center justify-center ${isLowAttendance ? 'bg-amber-50 text-amber-600' : 'bg-slate-100 text-slate-700'}`}>
+            <div className="h-8 w-8 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center">
               <ShieldCheck className="h-4 w-4" />
             </div>
           </CardHeader>
-          <CardContent className="space-y-1">
-            <div className="text-lg font-bold text-slate-900 flex items-center gap-1.5 pt-1">
+          <CardContent className="px-4 pb-4 space-y-1">
+            <div className="pt-0.5">
               {isLowAttendance ? (
-                <>
-                  <AlertTriangle className="h-5 w-5 text-amber-500" />
-                  <span className="text-amber-700 text-sm">Under Review</span>
-                </>
+                <div className="flex items-center gap-1.5 text-amber-700 font-bold text-sm">
+                  <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600" />
+                  <span>Advisory Notice</span>
+                </div>
               ) : (
-                <>
-                  <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-                  <span className="text-emerald-700 text-sm">Eligible for Hall Ticket</span>
-                </>
+                <div className="flex items-center gap-1.5 text-emerald-700 font-bold text-sm">
+                  <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
+                  <span>Clearance Granted</span>
+                </div>
               )}
             </div>
-            <p className="text-xs text-slate-500">
-              {isLowAttendance ? 'Requires medical proof or dean waiver' : 'Regular academic standing verified'}
+            <p className="text-xs text-slate-500 font-medium pt-1">
+              {isLowAttendance ? 'Submit condonation letter before finals' : 'Approved for Semester Theory & Labs'}
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Metric 4: Academic Buffer / Standing (Warm Gold / Amber) */}
+        <Card className="border border-slate-200/80 bg-white shadow-sm overflow-hidden relative group hover:shadow-md transition-shadow">
+          <div className="h-1 bg-gradient-to-r from-amber-500 to-orange-500" />
+          <CardHeader className="pb-2 pt-4 px-4 flex flex-row items-center justify-between space-y-0">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+              Academic Standing
+            </span>
+            <div className="h-8 w-8 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center">
+              <BookOpen className="h-4 w-4" />
+            </div>
+          </CardHeader>
+          <CardContent className="px-4 pb-4 space-y-1">
+            <div className="text-base font-bold text-slate-900 pt-0.5">
+              {isLowAttendance ? (
+                <span className="text-amber-700 font-mono text-sm">Attend next {classesNeeded || 1} lecture(s)</span>
+              ) : (
+                <span className="text-slate-900">Good Standing</span>
+              )}
+            </div>
+            <p className="text-xs text-slate-500 font-medium pt-1">
+              SVSU Academic Ordinance §14(B)
             </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Defaulter Alert if < 75% */}
+      {/* Advisory Banner if Low Attendance */}
       {isLowAttendance && (
-        <Alert variant="destructive" className="border border-red-200 bg-red-50 text-red-900 py-3">
-          <AlertTriangle className="h-4 w-4 text-red-600" />
-          <AlertTitle className="font-semibold text-xs tracking-wide uppercase">
-            Attendance Advisory Notice
-          </AlertTitle>
-          <AlertDescription className="text-xs text-red-700 mt-0.5">
-            Your lecture attendance is currently below the university regulatory threshold (75%). Please ensure regular class attendance. Submit valid physician medical certificates under Attendance Records if condonation is required.
-          </AlertDescription>
-        </Alert>
+        <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-3 text-amber-900 text-xs shadow-xs">
+          <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+          <div>
+            <span className="font-bold uppercase tracking-wider text-[10px] bg-amber-200 px-1.5 py-0.5 rounded text-amber-900 inline-block mr-1.5">
+              Attendance Advisory
+            </span>
+            <span>
+              Your current attendance ({attendancePercentage}%) is below the university threshold (75%). Please ensure attendance in upcoming lectures to avoid hall ticket debarment.
+            </span>
+          </div>
+        </div>
       )}
     </div>
   );
