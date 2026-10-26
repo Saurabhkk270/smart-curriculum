@@ -196,31 +196,31 @@ export function FloatingAIBot() {
 
   const btnGlow =
     role === "admin"
-      ? "from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+      ? "from-slate-900 to-slate-800 hover:from-slate-800 hover:to-slate-700"
       : role === "teacher"
-      ? "from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700"
-      : "from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700";
+      ? "from-blue-700 to-indigo-800 hover:from-blue-800 hover:to-indigo-900"
+      : "from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900";
 
   return (
     <>
       {/* 1. FLOATING ACTION BUTTON (Always pinned to bottom-right) */}
       {!isOpen && (
         <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 group">
-          <div className="hidden sm:flex items-center px-3 py-1.5 rounded-full bg-card border shadow-md text-xs font-medium text-foreground gap-1.5 animate-in fade-in slide-in-from-right-4 duration-300">
-            <Sparkles className="h-3.5 w-3.5 text-primary animate-pulse" />
-            <span>Need help? Ask AI</span>
+          <div className="hidden sm:flex items-center px-3 py-1.5 rounded-full bg-white border border-slate-200 shadow-md text-xs font-semibold text-slate-700 gap-1.5 animate-in fade-in slide-in-from-right-4 duration-300">
+            <Sparkles className="h-3.5 w-3.5 text-blue-600 animate-pulse" />
+            <span>Campus AI Copilot</span>
           </div>
 
           <Button
             onClick={() => setIsOpen(true)}
             size="lg"
-            className={`h-14 w-14 rounded-full shadow-2xl bg-gradient-to-r ${btnGlow} text-white p-0 relative transition-transform duration-300 hover:scale-110 active:scale-95`}
+            className={`h-13 w-13 rounded-full shadow-xl bg-gradient-to-r ${btnGlow} text-white p-0 relative transition-transform duration-200 hover:scale-105 active:scale-95 border border-white/20`}
             aria-label="Open AI Assistant"
           >
-            <Bot className="h-7 w-7" />
-            <span className="absolute -top-1 -right-1 flex h-4 w-4">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-4 w-4 bg-emerald-400 border-2 border-white"></span>
+            <Bot className="h-6 w-6" />
+            <span className="absolute -top-0.5 -right-0.5 flex h-3.5 w-3.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500 border-2 border-white"></span>
             </span>
           </Button>
         </div>
@@ -228,22 +228,22 @@ export function FloatingAIBot() {
 
       {/* 2. CHAT DRAWER / POPUP */}
       {isOpen && (
-        <Card className="fixed bottom-6 right-6 z-50 w-[92vw] sm:w-[420px] h-[580px] max-h-[85vh] shadow-2xl border-2 border-primary/20 flex flex-col bg-background rounded-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <Card className="fixed bottom-6 right-6 z-50 w-[92vw] sm:w-[420px] h-[580px] max-h-[85vh] shadow-2xl border border-slate-300 flex flex-col bg-white rounded-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
           {/* Header */}
-          <CardHeader className="py-3 px-4 bg-gradient-to-r from-primary/10 via-primary/5 to-muted border-b flex flex-row items-center justify-between shrink-0">
+          <CardHeader className="py-3 px-4 bg-slate-900 text-white border-b border-slate-800 flex flex-row items-center justify-between shrink-0">
             <div className="flex items-center gap-2.5">
-              <div className="h-9 w-9 rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-sm">
-                <Bot className="h-5 w-5" />
+              <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-xs">
+                <Bot className="h-4 w-4" />
               </div>
               <div>
-                <CardTitle className="text-sm font-bold flex items-center gap-1.5">
+                <CardTitle className="text-sm font-bold flex items-center gap-1.5 text-white">
                   SVSU AI Copilot
                   <Badge className={`text-[10px] px-1.5 py-0 font-normal uppercase ${badgeColor}`}>
                     {role}
                   </Badge>
                 </CardTitle>
-                <div className="text-[11px] text-muted-foreground flex items-center gap-1">
-                  <span className="h-1.5 w-1.5 rounded-full bg-green-500"></span>
+                <div className="text-[11px] text-slate-300 flex items-center gap-1">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
                   Ready to assist {userName}
                 </div>
               </div>
@@ -252,7 +252,7 @@ export function FloatingAIBot() {
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-full"
+              className="h-8 w-8 text-slate-400 hover:text-white hover:bg-slate-800 rounded-full"
               onClick={() => setIsOpen(false)}
             >
               <X className="h-4 w-4" />

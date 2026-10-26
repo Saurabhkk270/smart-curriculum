@@ -95,28 +95,46 @@ export function AppSidebar() {
   const roleBadge = role === 'admin' ? 'Administrator' : role === 'teacher' ? 'Faculty' : 'Student';
 
   return (
-    <Sidebar className={cn(isCollapsed ? 'w-14' : 'w-64', "bg-white border-r border-border")} collapsible="icon">
+    <Sidebar className={cn(isCollapsed ? 'w-14' : 'w-64', "bg-white border-r border-slate-200")} collapsible="icon">
       <SidebarContent className="bg-white overflow-y-auto">
         <SidebarGroup>
-          <div className="px-3 py-3 border-b mb-2 flex items-center justify-between">
-            {!isCollapsed && (
-              <>
-                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{menuTitle}</span>
-                <Badge variant={role === 'admin' ? 'default' : role === 'teacher' ? 'secondary' : 'outline'} className="text-[10px] capitalize">
+          <div className="px-3 py-3 border-b border-slate-200 mb-2 flex items-center justify-between bg-slate-50/70">
+            {!isCollapsed ? (
+              <div className="flex items-center gap-2 w-full justify-between">
+                <div className="flex items-center gap-2">
+                  <img src="/logo.png" alt="SVSU" className="h-6 w-6 object-contain" />
+                  <div>
+                    <span className="text-xs font-bold text-slate-900 tracking-tight block leading-none">
+                      {role === 'admin' ? 'Admin Suite' : role === 'teacher' ? 'Faculty Portal' : 'Student Portal'}
+                    </span>
+                    <span className="text-[10px] text-slate-500 font-medium">SVSU ERP</span>
+                  </div>
+                </div>
+                <Badge 
+                  variant="outline"
+                  className={cn(
+                    "text-[10px] font-semibold",
+                    role === 'admin' ? 'bg-slate-900 text-white border-slate-900' : role === 'teacher' ? 'bg-blue-50 text-blue-800 border-blue-200' : 'bg-slate-100 text-slate-700 border-slate-300'
+                  )}
+                >
                   {roleBadge}
                 </Badge>
-              </>
+              </div>
+            ) : (
+              <div className="mx-auto">
+                <img src="/logo.png" alt="SVSU" className="h-6 w-6 object-contain" />
+              </div>
             )}
           </div>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild className="text-foreground hover:bg-muted hover:text-foreground">
+                  <SidebarMenuButton asChild className="text-slate-700 hover:bg-slate-100 hover:text-slate-900">
                     <NavLink
                       to={item.url}
-                      className="flex items-center gap-2.5 w-full"
-                      activeClassName="bg-primary text-primary-foreground font-medium hover:bg-primary hover:text-primary-foreground"
+                      className="flex items-center gap-2.5 w-full rounded-md px-2.5 py-1.5 transition-colors"
+                      activeClassName="bg-blue-700 text-white font-semibold hover:bg-blue-700 hover:text-white shadow-xs"
                       onClick={() => setOpenMobile(false)}
                     >
                       <item.icon className="h-4 w-4 flex-shrink-0" />

@@ -51,22 +51,27 @@ export function AdminSidebar() {
   return (
     <div className="flex h-full w-64 flex-col bg-sidebar border-r border-sidebar-border">
       {/* Top Header */}
-      <div className="flex h-14 items-center justify-between px-4 border-b border-sidebar-border bg-primary/5">
+      <div className="flex h-14 items-center justify-between px-4 border-b border-sidebar-border bg-slate-50">
         <div className="flex items-center gap-2">
-          <ShieldCheck className="h-5 w-5 text-primary" />
-          <h2 className="text-base font-bold text-sidebar-foreground">Admin Portal</h2>
+          <img src="/logo.png" alt="SVSU" className="h-6 w-6 object-contain" />
+          <div>
+            <h2 className="text-xs font-bold text-slate-900 tracking-tight leading-none">SVSU Admin</h2>
+            <span className="text-[9px] text-slate-500 font-mono">Central ERP Control</span>
+          </div>
         </div>
-        <Badge variant="outline" className="text-[10px] border-primary text-primary">10 Phases</Badge>
+        <Badge variant="outline" className="text-[10px] border-blue-600 text-blue-700 bg-blue-50 font-mono">
+          CLEARANCE L1
+        </Badge>
       </div>
 
       {/* Switch to Teacher / Student App */}
-      <div className="p-2 border-b bg-muted/30">
+      <div className="p-2 border-b bg-white">
         <Link
           to="/dashboard/classes"
-          className="flex items-center justify-center gap-1.5 w-full py-1.5 px-3 rounded-md bg-white border shadow-xs text-xs font-medium text-foreground hover:bg-muted transition-colors"
+          className="flex items-center justify-center gap-1.5 w-full py-1.5 px-3 rounded-md bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition-colors"
         >
-          <ArrowLeft className="h-3.5 w-3.5 text-primary" />
-          <span>Switch to Teacher / Student</span>
+          <ArrowLeft className="h-3.5 w-3.5 text-blue-700" />
+          <span>Faculty & Classroom App</span>
         </Link>
       </div>
 
