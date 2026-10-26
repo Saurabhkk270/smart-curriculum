@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./components/AuthProvider";
 import { BiometricGate } from "./components/BiometricGate";
 import { RoleRoute } from "./components/RoleRoute";
+import { FloatingAIBot } from "./components/FloatingAIBot";
 
 // Lazy load all page components
 const Auth = lazy(() => import("./pages/Auth"));
@@ -130,6 +131,7 @@ const App = () => (
         <AuthProvider>
           <BiometricGate>
             <AppRoutes />
+            <FloatingAIBot />
           </BiometricGate>
         </AuthProvider>
       </BrowserRouter>
