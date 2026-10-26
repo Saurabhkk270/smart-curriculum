@@ -1,10 +1,11 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, Link } from 'react-router-dom';
 import { useAuth } from '@/components/AuthProvider';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AdminSidebar } from '@/components/layout/AdminSidebar';
-import { AlertTriangle, Menu } from 'lucide-react';
+import { AlertTriangle, Menu, ArrowLeft } from 'lucide-react';
 
 const AdminLayout = () => {
   const { profile, authError, signOut } = useAuth();
@@ -32,7 +33,16 @@ const AdminLayout = () => {
                   </h1>
                 </div>
               </div>
-              <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+              <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                <Link to="/dashboard/classes">
+                  <Button variant="outline" size="sm" className="text-xs h-8 px-2.5 gap-1.5 font-medium">
+                    <ArrowLeft className="h-3.5 w-3.5" />
+                    <span>Teacher & Student Views</span>
+                  </Button>
+                </Link>
+                <Badge variant="secondary" className="text-xs bg-primary/10 text-primary hidden sm:inline-flex">
+                  Superadmin
+                </Badge>
                 <span className="text-xs sm:text-sm font-medium hidden md:inline">{profile?.full_name}</span>
                 <Button variant="outline" size="sm" onClick={signOut} className="text-xs sm:text-sm h-8 px-2 sm:px-3">
                   Sign Out

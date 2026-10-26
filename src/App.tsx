@@ -66,8 +66,7 @@ const AppRoutes = () => {
   }
 
   const isTeacher = profile?.role === 'teacher' || profile?.role === 'admin';
-  const teacherRoles = ['teacher', 'admin'] as const;
-  const studentRoles = ['student'] as const;
+  const allRoles = ['student', 'teacher', 'admin'] as const;
 
   return (
     <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
@@ -75,10 +74,10 @@ const AppRoutes = () => {
         <Route path="/auth" element={<Auth />} />
         <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
-          <Route path="classes" element={<RoleRoute allow={[...teacherRoles]}><TeacherClasses /></RoleRoute>} />
-          <Route path="students" element={<RoleRoute allow={[...teacherRoles]}><TeacherStudents /></RoleRoute>} />
-          <Route path="qr-code" element={<RoleRoute allow={[...teacherRoles]}><TeacherQRCode /></RoleRoute>} />
-          <Route path="manual" element={<RoleRoute allow={[...teacherRoles]}><TeacherManual /></RoleRoute>} />
+          <Route path="classes" element={<RoleRoute allow={[...allRoles]}><TeacherClasses /></RoleRoute>} />
+          <Route path="students" element={<RoleRoute allow={[...allRoles]}><TeacherStudents /></RoleRoute>} />
+          <Route path="qr-code" element={<RoleRoute allow={[...allRoles]}><TeacherQRCode /></RoleRoute>} />
+          <Route path="manual" element={<RoleRoute allow={[...allRoles]}><TeacherManual /></RoleRoute>} />
           <Route 
             path="timetable" 
             element={isTeacher ? <TeacherTimetable /> : <StudentTimetable />} 
@@ -91,10 +90,10 @@ const AppRoutes = () => {
             path="records" 
             element={isTeacher ? <TeacherRecords /> : <StudentRecords />} 
           />
-          <Route path="scanner" element={<RoleRoute allow={[...studentRoles]}><StudentScanner /></RoleRoute>} />
-          <Route path="calendar" element={<RoleRoute allow={[...studentRoles]}><StudentCalendar /></RoleRoute>} />
+          <Route path="scanner" element={<RoleRoute allow={[...allRoles]}><StudentScanner /></RoleRoute>} />
+          <Route path="calendar" element={<RoleRoute allow={[...allRoles]}><StudentCalendar /></RoleRoute>} />
         </Route>
-        <Route path="/admin" element={<ProtectedRoute><RoleRoute allow={['admin']}><AdminLayout /></RoleRoute></ProtectedRoute>}>
+        <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
           <Route index element={<AdminDashboard />} />
           <Route path="students" element={<AdminStudents />} />
           <Route path="teachers" element={<AdminTeachers />} />

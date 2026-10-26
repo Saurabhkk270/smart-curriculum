@@ -45,10 +45,24 @@ export function AdminSidebar() {
 
   return (
     <div className="flex h-full w-64 flex-col bg-sidebar border-r border-sidebar-border">
-      <div className="flex h-14 items-center px-4 border-b border-sidebar-border">
+      <div className="flex h-14 items-center justify-between px-4 border-b border-sidebar-border">
         <h2 className="text-lg font-semibold text-sidebar-foreground">Admin Portal</h2>
+        <Link
+          to="/dashboard/classes"
+          className="text-xs text-primary hover:underline font-medium"
+        >
+          App View →
+        </Link>
       </div>
-      <div className="flex-1 overflow-y-auto py-4">
+      <div className="p-2 border-b">
+        <Link
+          to="/dashboard/classes"
+          className="flex items-center justify-center gap-1.5 w-full py-1.5 px-3 rounded-md bg-muted text-foreground text-xs font-medium hover:bg-muted/80 transition-colors"
+        >
+          <span>← Back to Classes / Scanner</span>
+        </Link>
+      </div>
+      <div className="flex-1 overflow-y-auto py-2">
         <nav className="space-y-1 px-2">
           {navigation.map((item) => {
             const isActive = location.pathname === item.href || location.pathname.startsWith(`${item.href}/`);
