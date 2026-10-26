@@ -35,12 +35,14 @@ const DashboardLayout = () => {
                 </div>
               </div>
               <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-                <Link to="/admin">
-                  <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-xs h-8 px-2.5 gap-1.5 shadow-sm">
-                    <ShieldCheck className="h-3.5 w-3.5" />
-                    <span>Admin Portal</span>
-                  </Button>
-                </Link>
+                {profile?.role === 'admin' && (
+                  <Link to="/admin">
+                    <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-xs h-8 px-2.5 gap-1.5 shadow-sm">
+                      <ShieldCheck className="h-3.5 w-3.5" />
+                      <span>Admin Portal</span>
+                    </Button>
+                  </Link>
+                )}
                 <Badge variant="outline" className="capitalize text-xs hidden sm:inline-flex">
                   {profile?.role || 'student'}
                 </Badge>

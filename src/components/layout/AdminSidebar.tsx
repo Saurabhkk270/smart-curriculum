@@ -100,32 +100,6 @@ export function AdminSidebar() {
               </Link>
             );
           })}
-
-          {/* Quick jump to Teacher/Student tools */}
-          <div className="pt-4 pb-1 px-2 text-[11px] font-bold text-muted-foreground uppercase tracking-wider border-t mt-3">
-            Quick Jump
-          </div>
-          <Link
-            to="/dashboard/classes"
-            className="flex items-center gap-2.5 px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground rounded-md hover:bg-muted"
-          >
-            <Users className="h-3.5 w-3.5 text-emerald-600" />
-            <span>Teacher Classes</span>
-          </Link>
-          <Link
-            to="/dashboard/qr-code"
-            className="flex items-center gap-2.5 px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground rounded-md hover:bg-muted"
-          >
-            <QrCode className="h-3.5 w-3.5 text-emerald-600" />
-            <span>QR Code Generator</span>
-          </Link>
-          <Link
-            to="/dashboard/scanner"
-            className="flex items-center gap-2.5 px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground rounded-md hover:bg-muted"
-          >
-            <CalendarDays className="h-3.5 w-3.5 text-blue-600" />
-            <span>Student QR Scanner</span>
-          </Link>
         </nav>
       </div>
     </div>

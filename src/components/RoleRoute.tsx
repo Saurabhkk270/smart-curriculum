@@ -8,7 +8,11 @@ interface RoleRouteProps {
   children: React.ReactNode;
 }
 
-const defaultPathForRole = (role?: Role) => (role === 'teacher' || role === 'admin' ? '/dashboard/classes' : '/dashboard/scanner');
+const defaultPathForRole = (role?: Role) => {
+  if (role === 'admin') return '/admin';
+  if (role === 'teacher') return '/dashboard/classes';
+  return '/dashboard/scanner';
+};
 
 export const RoleRoute = ({ allow, children }: RoleRouteProps) => {
   const { profile, loading } = useAuth();
